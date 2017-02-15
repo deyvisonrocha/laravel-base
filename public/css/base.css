@@ -1,0 +1,30 @@
+.version_top {
+    line-height: 20px;
+    color: #ffffff;
+    box-sizing: border-box;
+    margin-top: 1px;
+    margin-right: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    display: block;
+}
+
+.common_errors {
+    padding: 15px;
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.dataTables_wrapper .dt-buttons {
+    float: left;
+}
+
+.dataTables_filter {
+    margin-bottom: 5px !important;
+}
+
+.multiselect_list {
+    width: 100%;
+}
