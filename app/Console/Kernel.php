@@ -13,7 +13,10 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        \Spatie\MigrateFresh\Commands\MigrateFresh::class
+        \Spatie\MigrateFresh\Commands\MigrateFresh::class,
+        \App\Console\Commands\ScaffoldCommand::class,
+        \App\Console\Commands\ScaffoldModelCommand::class,
+        \App\Console\Commands\ScaffoldDestroy::class,
     ];
 
     /**
