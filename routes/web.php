@@ -19,7 +19,7 @@ Route::group(['middleware' => 'web'], function () {
     Route::auth();
 
     Route::group(['middleware' => 'auth'], function () {
-        Route::get('/', 'HomeController@index');
+        Route::get('/', 'HomeController@index')->name('dashboard');
         Route::get('/dashboard', 'HomeController@index');
 
         Route::resource('roles', 'RolesController');

@@ -9,25 +9,23 @@
 @section('content')
     <div class="box box-primary">
         <div class="box-body">
-            <div class="row" style="padding-left: 20px">
-                <!-- Id Field -->
-                <div class="form-group">
-                    {!! Form::label('id', trans('modules.roles.name')) !!}
-                    <p>{!! $role->name !!}</p>
-                </div>
-
-                <!-- Id Field -->
-                <div class="form-group">
-                    {!! Form::label('id', trans('modules.permissions.permissions')) !!}
-                    @foreach($role->permissions as $permission)
-                        <ul>
-                            <li>{{ $permission['module'] . ' - ' . $permission['label'] }}</li>
-                        </ul>
-                    @endforeach
-                </div>
-
-                <a href="{!! route('roles.index') !!}" class="btn btn-default">{{ trans('messages.form.back') }}</a>
+            <!-- Name Field -->
+            <div class="form-group">
+                {!! Form::label('id', trans('modules.roles.name')) !!}
+                <p>{!! $role->name !!}</p>
             </div>
+
+            <!-- Permissions Field -->
+            <div class="form-group">
+                {!! Form::label('id', trans('modules.permissions.permissions')) !!}
+                @foreach($role->permissions as $permission)
+                    <ul>
+                        <li>{{ $permission['module'] . ' - ' . $permission['label'] }}</li>
+                    </ul>
+                @endforeach
+            </div>
+
+            <a href="{!! route('roles.index') !!}" class="btn btn-default">{{ trans('messages.form.back') }}</a>
         </div>
     </div>
 @stop

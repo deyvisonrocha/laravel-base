@@ -1,0 +1,6 @@
+[repeat]
+<div class="form-group col-md-3">
+    {{ Form::label('[property]', trans('modules.[models].[property]')) }}
+    {{ Form::text('[property]', null, array('class' => 'form-control')) }}
+</div>
+[/repeat]

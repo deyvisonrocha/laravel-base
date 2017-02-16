@@ -1,0 +1,27 @@
+@extends('adminlte::page')
+
+@section('title', trans('modules.[models].[model]'))
+
+@section('content_header')
+    <h1>{{ trans('modules.[models].[model]') }}</h1>
+@stop
+
+@section('content')
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                @can('[models].create')
+                    <a type="button" class="btn btn-primary" href="{{ route('[models].create') }}"><i class="fa fa-plus"></i> Adicionar</a>
+                @endcan
+                <div class="clearfix">&nbsp;</div>
+                {!! $dataTable->table() !!}
+            </div>
+        </div>
+    </div>
+</div>
+@stop
+
+@push('js')
+    {!! $dataTable->scripts() !!}
+@endpush

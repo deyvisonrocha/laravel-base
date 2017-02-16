@@ -1,0 +1,58 @@
+<?php
+
+[namespace]
+
+use App\Models\[Model];
+use Yajra\Datatables\Services\DataTable;
+
+class [Models]DataTable extends BaseDataTable
+{
+    protected $action_view = '[models].datatables_actions';
+
+    /**
+     * Display ajax response.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function ajax()
+    {
+        return $this->datatables
+            ->eloquent($this->query())
+            ->addColumn('action', $this->action_view)
+            ->make(true);
+    }
+
+    /**
+     * Get the query object to be processed by dataTables.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder|\Illuminate\Support\Collection
+     */
+    public function query()
+    {
+        $query = [Model]::query();
+
+        return $this->applyScopes($query);
+    }
+
+    /**
+     * Get columns.
+     *
+     * @return array
+     */
+    protected function getColumns()
+    {
+        return [
+            // add columns
+        ];
+    }
+
+    /**
+     * Get filename for export.
+     *
+     * @return string
+     */
+    protected function filename()
+    {
+        return '[models]datatables_' . time();
+    }
+}

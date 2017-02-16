@@ -1,0 +1,23 @@
+@extends('adminlte::page')
+
+@section('title', trans('modules.[models].[model]'))
+
+@section('content_header')
+    <h1>{{ trans('messages.show') }} {{ trans('modules.[models].[model]') }}</h1>
+@stop
+
+@section('content')
+    <div class="box box-primary">
+        <div class="box-body">
+            [repeat]
+            <!-- [Property] Field -->
+            <div class="form-group">
+                {!! Form::label('[property]', trans('modules.[models].[property]')) !!}
+                <p>{!! $[model]->[property] !!}</p>
+            </div>
+            [/repeat]
+
+            <a href="{!! route('[models].index') !!}" class="btn btn-default">{{ trans('messages.form.back') }}</a>
+        </div>
+    </div>
+@stop

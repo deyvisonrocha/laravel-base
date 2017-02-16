@@ -1,0 +1,84 @@
+<?php
+
+[namespace]
+
+use App\DataTables\[Models]DataTable;
+use App\Http\Requests\[Models]\CreateRequest as [Models]CreateRequest;
+use App\Http\Requests\[Models]\UpdateRequest as [Models]UpdateRequest;
+use App\Repositories\[Models]Repository;
+
+class [controller] extends BaseController
+{
+    /* @var [Models]Repository */
+    protected $repository;
+
+    public function __construct([Models]Repository $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    public function index([Models]DataTable $dataTable)
+    {
+        $this->authorize('[models].index');
+
+        return $dataTable->render('[models].index');
+    }
+
+    public function create()
+    {
+        $this->authorize('[models].create');
+
+        return view('[models].create');
+    }
+
+    public function store([Models]CreateRequest $request)
+    {
+        $this->authorize('[models].create');
+
+        $this->repository->create($request->all());
+
+        \Flash::success(trans('messages.created_success', ['module' => trans('modules.[models].[model]')]));
+
+        return redirect(route('[models].index'));
+    }
+
+    public function edit($id)
+    {
+        $this->authorize('[models].edit');
+
+        $[model] = $this->repository->find($id);
+
+        return view('[models].edit', compact('[model]'));
+    }
+
+    public function show($id)
+    {
+        $this->authorize('[models].show');
+
+        $[model] = $this->repository->find($id);
+
+        return view('[model].show', compact('[model]'));
+    }
+
+    public function update($id, [Models]UpdateRequest $request)
+    {
+        $this->authorize('[models].edit');
+
+        $this->repository->update($request->all(), $id);
+
+        \Flash::success(trans('messages.updated_success', ['module' => trans('modules.[models].[model]')]));
+
+        return redirect(route('[models].index'));
+    }
+
+    public function destroy($id)
+    {
+        $this->authorize('[models].destroy');
+
+        $this->repository->delete($id);
+
+        \Flash::success(trans('messages.deleted_success', ['module' => trans('modules.[models].[model]')]));
+
+        return redirect(route('[models].index'));
+    }
+}
