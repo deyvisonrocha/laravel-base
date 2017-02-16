@@ -11,7 +11,7 @@
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
-                @can('users.create')
+                @can('roles.create')
                     <a type="button" class="btn btn-primary" href="{{ route('roles.create') }}"><i class="fa fa-plus"></i> Adicionar</a>
                 @endcan
                 <div class="clearfix">&nbsp;</div>
