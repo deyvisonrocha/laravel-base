@@ -407,12 +407,7 @@ class Scaffold
 
             if(!$this->model->exists)
             {
-                if($this->configSettings['useRepository'])
-                {
-                    $this->createRepository();
-                    $this->createRepositoryInterface();
-                    $this->putRepositoryFolderInStartFiles();
-                }
+                $this->createRepository();
 
                 $this->createDataTable();
 
@@ -571,7 +566,7 @@ class Scaffold
      */
     private function getControllerType()
     {
-        return $this->isResource ? "resource" : "restful";
+        return "resource";
     }
 
     /**
@@ -779,35 +774,6 @@ class Scaffold
     }
 
     /**
-     *  Create the repository interface
-     *
-     * @return array
-     */
-    private function createRepositoryInterface()
-    {
-        $this->fileCreator->createDirectory($this->configSettings['pathTo']['repositoryInterfaces']);
-
-        $baseRepository = $this->configSettings['pathTo']['repositoryInterfaces'] . $this->nameOf("baseRepositoryInterface") . ".php";
-
-        $useBaseRepository = $this->configSettings['useBaseRepository'];
-
-        $repoTemplate = $this->configSettings['pathTo']['templates']."repository-interface";
-
-        if($useBaseRepository)
-        {
-            if(!file_exists($baseRepository))
-                $this->makeFileFromTemplate($baseRepository, $this->configSettings['pathTo']['templates']."base-repository-interface.stub");
-            $repoTemplate .= "-with-base";
-        }
-
-        $repoTemplate .= ".stub";
-
-        $fileName = $this->configSettings['pathTo']['repositoryInterfaces'] . $this->nameOf("repositoryInterface") . ".php";
-
-        $this->makeFileFromTemplate($fileName, $repoTemplate);
-    }
-
-    /**
      *  Create the repository
      *
      * @return array
@@ -855,6 +821,18 @@ class Scaffold
      *
      * @return array
      */
+    private function createDataTable()
+    {
+        $fileName = $this->configSettings['pathTo']['datatables'] . $this->nameOf("model"). ".php";
+
+        $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates']."/datatables.stub");
+    }
+
+    /**
+     *  Create controller
+     *
+     * @return array
+     */
     private function createController()
     {
         $fileName = $this->configSettings['pathTo']['controllers'] . $this->nameOf("controller"). ".php";
@@ -889,10 +867,7 @@ class Scaffold
 
         $fileContents = "";
 
-        if($this->configSettings['useRepository'])
-            $fileContents = "\nApp::bind('" . $namespace . $this->nameOf("repositoryInterface")."','" . $namespace . $this->nameOf("repository") ."');\n";
-
-        $routeType = $this->isResource ? "resource" : "controller";
+        $routeType = "resource";
 
         $fileContents .= "Route::" . $routeType . "('" . $this->nameOf("viewFolder") . "', '" . $namespace. $this->nameOf("controller") ."');\n";
 
@@ -936,16 +911,7 @@ class Scaffold
      */
     public function makeFileFromTemplate($fileName, $template, $content = "")
     {
-        try
-        {
-            $fileContents = \File::get($template);
-        }
-        catch(FileNotFoundException $e)
-        {
-            $shortTemplate = substr($template, strpos($template, $this->configSettings["pathTo"]["templates"]) + strlen($this->configSettings["pathTo"]["templates"]),strlen($template)-strlen($this->configSettings["pathTo"]["templates"]));
-            $this->fileCreator->copyFile("vendor/jrenton/laravel-scaffold/src/Jrenton/LaravelScaffold/templates/".$shortTemplate, $template);
-            $fileContents = \File::get($template);
-        }
+        $fileContents = \File::get($template);
 
         $fileContents = $this->replaceNames($fileContents);
         $fileContents = $this->replaceModels($fileContents);
@@ -956,9 +922,6 @@ class Scaffold
 
         $namespace = $this->namespace ? "namespace ".$this->namespace. ";" : "";
         $fileContents = str_replace("[namespace]", $namespace, $fileContents);
-
-        if(!$this->configSettings['useRepository'])
-            $fileContents = str_replace($this->nameOf("repositoryInterface"), $this->nameOf("modelName"), $fileContents);
 
         $this->fileCreator->createFile($fileName, $fileContents);
     }
