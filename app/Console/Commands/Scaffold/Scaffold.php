@@ -44,11 +44,6 @@ class Scaffold
     private $fileCreator;
 
     /**
-     * @var AssetDownloader
-     */
-    private $assetDownloader;
-
-    /**
      * @var array
      */
     protected $configSettings;
@@ -100,7 +95,6 @@ class Scaffold
         $this->configSettings = $this->getConfigSettings();
         $this->command = $command;
         $this->fileCreator = new FileCreator($command);
-        $this->assetDownloader = new AssetDownloader($command, $this->configSettings, $this->fileCreator);
     }
 
     /**
@@ -110,11 +104,9 @@ class Scaffold
      */
     private function getConfigSettings()
     {
-        $package = "laravel5scaffold";
+        $configSettings = [];
 
-        $configSettings = array();
-
-        $configSettings['pathTo'] = config("$package.paths");
+        $configSettings['pathTo'] = config("scaffold.paths");
 
         foreach($configSettings['pathTo'] as $pathName => $path)
         {
@@ -127,19 +119,9 @@ class Scaffold
             }
         }
 
-        $configSettings['names'] = config("$package.names");
+        $configSettings['names'] = config("scaffold.names");
 
-        $configSettings['appName'] = config("$package.appName");
-
-        $configSettings['downloads'] = config("$package.downloads");
-
-        $configSettings['views'] = config("$package.views");
-
-        $configSettings['useRepository'] = config("$package.repository");
-
-        $configSettings['useBaseRepository'] = config("$package.baseRepository");
-
-        $configSettings['modelDefinitionsFile'] = config("$package.modelDefinitionsFile");
+        $configSettings['views'] = config("scaffold.views");
 
         return $configSettings;
     }
@@ -151,7 +133,6 @@ class Scaffold
     {
         $this->fromFile = false;
         $this->fileCreator->fromFile = false;
-        $this->assetDownloader->fromFile = false;
 
         $this->setupLayoutFiles(); // OK
 
@@ -186,7 +167,6 @@ class Scaffold
     {
         $this->fileCreator->fromFile = true;
         $this->fromFile = true;
-        $this->assetDownloader->fromFile = true;
 
         $this->setupLayoutFiles();
 
@@ -210,7 +190,6 @@ class Scaffold
     {
         $this->fileCreator->fromFile = true;
         $this->fromFile = true;
-        $this->assetDownloader->fromFile = true;
 
         $this->setupLayoutFiles();
 

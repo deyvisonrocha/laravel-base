@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use App\Console\Commands\Scaffold\Scaffold;
 
 class ScaffoldCommand extends Command
 {
