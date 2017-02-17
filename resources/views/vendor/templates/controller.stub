@@ -1,6 +1,4 @@
-<?php
-
-[namespace]
+<?php[namespace]
 
 use App\DataTables\[Models]DataTable;
 use App\Http\Requests\[Models]\CreateRequest as [Models]CreateRequest;

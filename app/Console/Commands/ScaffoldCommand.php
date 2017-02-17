@@ -19,14 +19,6 @@ class ScaffoldCommand extends Command
 
     public function handle()
     {
-        // Etapas
-        // - DataTables
-        // - Controllers
-        // - Requests
-        // - Models
-        // - Repositories
-        // - routes/web.php
-        // - informar para adicionar o módulo no menu
         $scaffold = new Scaffold($this);
 
         $scaffold->setupLayoutFiles();

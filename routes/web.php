@@ -11,10 +11,6 @@
 |
 */
 
-// Auth::routes();
-
-// Route::get('/', 'HomeController@index');
-
 Route::group(['middleware' => 'web'], function () {
     Route::auth();
 
@@ -32,4 +28,3 @@ Route::group(['middleware' => 'web'], function () {
         // });
     });
 });
-

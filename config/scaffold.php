@@ -1,6 +1,9 @@
 <?php
 
 return [
+
+    'namespace' => 'App',
+
     /**
      * Paths
      *
@@ -27,9 +30,11 @@ return [
      * [model], [models], [Model], or [Models] are valid in the dynamic name
      */
     'names' => [
-        'controller' => '[Model]Controller',
+        'controller' => '[Models]Controller',
+        'datatables' => '[Models]DataTable',
         'modelName' => '[Model]',
         'repository' => '[Models]Repository',
+        'request' => '[Models]Request',
         'viewFolder' => '[models]',
     ],
 
@@ -42,8 +47,8 @@ return [
         'create',
         'datatables_actions',
         'edit',
-        'fields',
         'index',
-        'show'
+        'show',
+        'fields',
     ]
 ];

@@ -24,11 +24,6 @@ class Scaffold
     private $migration;
 
     /**
-     * @var bool
-     */
-    private $isResource;
-
-    /**
      * @var string
      */
     private $controllerType;
@@ -52,11 +47,6 @@ class Scaffold
      * @var \Illuminate\Console\Command
      */
     protected $command;
-
-    /**
-     * @var string
-     */
-    private $templatePathWithControllerType;
 
     /**
      * @var bool
@@ -134,7 +124,7 @@ class Scaffold
         $this->fromFile = false;
         $this->fileCreator->fromFile = false;
 
-        $this->setupLayoutFiles(); // OK
+        $this->setupLayoutFiles();
 
         $modelAndProperties = $this->askForModelAndFields();
 
@@ -144,13 +134,9 @@ class Scaffold
         {
             $this->saveModelAndProperties($modelAndProperties, array());
 
-            $this->isResource = 'y';
-
             $this->createFiles();
 
             $this->command->info("Model ".$this->model->upper(). " and all associated files created successfully!");
-
-            $this->addToModelDefinitions($modelAndProperties);
 
             $modelAndProperties = $this->command->ask('Add model with fields or "q" to quit: ');
 
@@ -159,146 +145,11 @@ class Scaffold
     }
 
     /**
-     *  Generate models from a file
-     *
-     * @param $fileName
-     */
-    public function createModelsFromFile($fileName)
-    {
-        $this->fileCreator->fromFile = true;
-        $this->fromFile = true;
-
-        $this->setupLayoutFiles();
-
-        $inputFile = file($fileName);
-
-        $this->addAllModelsFromFile($inputFile);
-    }
-
-    /**
      *
      */
     public function setupLayoutFiles()
     {
         $this->laravelClasses = $this->getLaravelClassNames();
-    }
-
-    /**
-     *  Update any changes made to model definitions file
-     */
-    public function update()
-    {
-        $this->fileCreator->fromFile = true;
-        $this->fromFile = true;
-
-        $this->setupLayoutFiles();
-
-        $inputFile = file($this->configSettings['modelDefinitionsFile']);
-
-        $this->addAllModelsFromFile($inputFile);
-    }
-
-    /**
-     *  Add and save all models from specified file
-     *
-     * @param $inputFile
-     */
-    public function addAllModelsFromFile($inputFile)
-    {
-        $oldModelFile = array();
-
-        // Get the cached model definitions file to compare against
-        if(\File::exists($this->getModelCacheFile()))
-        {
-            $cachedFile = file($this->getModelCacheFile());
-            $oldModelFile = $this->getCachedModels($cachedFile, false);
-        }
-
-        // Loop through the file and create all associated files
-        foreach( $inputFile as $line_num => $modelAndProperties )
-        {
-            $modelAndProperties = trim($modelAndProperties);
-            if(!empty($modelAndProperties))
-            {
-                if(preg_match("/^resource =/", $modelAndProperties))
-                {
-                    $this->isResource = trim(substr($modelAndProperties, strpos($modelAndProperties, "=")+1));
-                    continue;
-                }
-
-                if(preg_match("/^namespace =/", $modelAndProperties))
-                {
-                    $this->namespaceGlobal = true;
-                    $this->namespace = trim(substr($modelAndProperties, strpos($modelAndProperties, "=")+1));
-                    $this->fileCreator->namespace = $this->namespace;
-                    continue;
-                }
-
-                $this->saveModelAndProperties($modelAndProperties, $oldModelFile);
-
-                $this->createFiles();
-            }
-        }
-
-        // If any models existed in the cached file,
-        // and not in the current file, drop that table
-        foreach ($oldModelFile as $tableName => $modelData)
-        {
-            if(!array_key_exists($tableName, $this->models))
-            {
-                $migration = new Migration($this->configSettings['pathTo']['migrations'], $modelData['model'], $this->fileCreator);
-                $migration->dropTable($this->lastTimeStamp);
-            }
-        }
-
-        copy($this->configSettings['modelDefinitionsFile'], $this->getModelCacheFile());
-    }
-
-    /**
-     *  Get all of the cached models from the specified file
-     *
-     * @param $inputFile
-     * @param bool $createFiles
-     * @return array
-     */
-    public function getCachedModels($inputFile, $createFiles = true)
-    {
-        $oldModelFile = array();
-
-        foreach( $inputFile as $line_num => $modelAndProperties )
-        {
-            $modelAndProperties = trim($modelAndProperties);
-            if(!empty($modelAndProperties))
-            {
-                if(preg_match("/^resource =/", $modelAndProperties))
-                {
-                    $this->isResource = trim(substr($modelAndProperties, strpos($modelAndProperties, "=")+1));
-                    continue;
-                }
-
-                if(preg_match("/^namespace =/", $modelAndProperties))
-                {
-                    $this->namespaceGlobal = true;
-                    $this->namespace = trim(substr($modelAndProperties, strpos($modelAndProperties, "=")+1));
-                    $this->fileCreator->namespace = $this->namespace;
-                    continue;
-                }
-
-                $this->saveModelAndProperties($modelAndProperties, array(), false);
-
-                $oldModelFile[$this->model->getTableName()] = array();
-
-                $oldModelFile[$this->model->getTableName()]['relationships'] = $this->model->getRelationships();
-                $oldModelFile[$this->model->getTableName()]['properties'] = $this->model->getProperties();
-                $oldModelFile[$this->model->getTableName()]['model'] = $this->model;
-
-
-                if($createFiles)
-                    $this->createFiles();
-            }
-        }
-
-        return $oldModelFile;
     }
 
     /**
@@ -362,31 +213,6 @@ class Scaffold
     }
 
     /**
-     *  Add the current model to the model definitions file
-     *
-     * @param $modelAndProperties
-     */
-    private function addToModelDefinitions($modelAndProperties)
-    {
-        \File::append($this->getModelCacheFile(), "\n" . $modelAndProperties);
-    }
-
-    /**
-     *  Gets the model cache file as it relates to the model definitions file
-     *
-     * @return string
-     */
-    private function getModelCacheFile()
-    {
-        $file = $this->configSettings['modelDefinitionsFile'];
-        $modelFilename = substr(strrchr($file, "/"), 1);
-        $ext = substr($modelFilename, strrpos($modelFilename, "."), strlen($modelFilename)-strrpos($modelFilename, "."));
-        $name = substr($modelFilename, 0, strrpos($modelFilename, "."));
-        $modelDefinitionsFile = substr($file, 0, strrpos($file, "/")+1) . "." . $name ."-cache". $ext;
-        return $modelDefinitionsFile;
-    }
-
-    /**
      *  Creates all of the files
      */
     private function createFiles()
@@ -399,27 +225,18 @@ class Scaffold
 
         $this->runMigrations();
 
-        if(!$this->onlyMigration && $tableCreated)
+        if($tableCreated)
         {
-            $this->controllerType = $this->getControllerType();
-
-            $this->templatePathWithControllerType = $this->configSettings['pathTo']['templates'] . $this->controllerType ."/";
+            $this->templatePathWithControllerType = $this->configSettings['pathTo']['templates'] ."/";
 
             if(!$this->model->exists)
             {
                 $this->createRepository();
-
                 $this->createDataTable();
-
                 $this->createController();
-
                 $this->createViews();
-
                 $this->updateRoutes();
-
-                $this->createTests();
-
-                $this->createSeeds();
+                $this->createRequests();
             }
         }
     }
@@ -437,23 +254,24 @@ class Scaffold
             $this->model->exists = true;
             return;
         }
-        if($this->model->hasSoftdeletes()) {
-            $fileContents = "\n\tuse Illuminate\Database\Eloquent\SoftDeletes;\n";
-        }
 
-        // $fileContents = "protected \$table = '". $this->model->getTableName() ."';\n";
+        $fileContents = "";
+
+        if($this->model->hasSoftdeletes()) {
+            $fileContents = "\tuse Illuminate\Database\Eloquent\SoftDeletes;\n";
+        }
 
         if(!$this->model->hasTimestamps())
             $fileContents .= "\tpublic \$timestamps = false;\n";
 
         $properties = "";
         foreach ($this->model->getProperties() as $property => $type) {
-            $properties .= "'$property',";
+            $properties .= "'$property',\n\t";
         }
 
         $properties = rtrim($properties, ",");
 
-        $fileContents .= "\tprotected \$fillable = array(".$properties.");\n";
+        $fileContents .= "\tprotected \$fillable = [\n\t\t".$properties."\n\t];\n";
 
         $fileContents = $this->addRelationships($fileContents);
 
@@ -560,16 +378,6 @@ class Scaffold
     }
 
     /**
-     *  Get controller type, either resource or restful
-     *
-     * @return string
-     */
-    private function getControllerType()
-    {
-        return "resource";
-    }
-
-    /**
      *  Gets the name from the configuration file
      *
      * @param string $type
@@ -640,7 +448,6 @@ class Scaffold
                     try
                     {
                         $this->command->call('migrate');
-                        $this->command->call('db:seed');
                         break;
                     }
                     catch (\Exception $e)
@@ -655,125 +462,6 @@ class Scaffold
     }
 
     /**
-     *  Generate the seeds file
-     */
-    private function createSeeds()
-    {
-        $faker = Factory::create();
-
-        $databaseSeeder = $this->configSettings['pathTo']['seeds'] . 'DatabaseSeeder.php';
-        $databaseSeederContents = \File::get($databaseSeeder);
-        if(preg_match("/faker/", $databaseSeederContents) !== 1)
-        {
-            $contentBefore = substr($databaseSeederContents, 0, strpos($databaseSeederContents, "{"));
-            $contentAfter = substr($databaseSeederContents, strpos($databaseSeederContents, "{")+1);
-
-            $databaseSeederContents = $contentBefore;
-            $databaseSeederContents .= "{\n\tprotected \$faker;\n\n";
-            $functionContents = "\t\tif(empty(\$this->faker)) {\n";
-            $functionContents .= "\t\t\t\$this->faker = Faker\\Factory::create();\n\t\t}\n\n";
-            $functionContents .= "\t\treturn \$this->faker;\n";
-
-            $databaseSeederContents .= $this->fileCreator->createFunction("getFaker", $functionContents);
-
-            $databaseSeederContents .= $contentAfter;
-
-            \File::put($databaseSeeder, $databaseSeederContents);
-        }
-
-        $functionContent = "\t\t\$faker = \$this->getFaker();\n\n";
-        $functionContent .= "\t\tfor(\$i = 1; \$i <= 10; \$i++) {\n";
-
-        $functionContent .= "\t\t\t\$".$this->model->lower()." = array(\n";
-
-        foreach($this->model->getProperties() as $property => $type)
-        {
-
-            if($property == "password")
-                $functionContent .= "\t\t\t\t'$property' => \\Hash::make('password'),\n";
-            else
-            {
-                $fakerProperty = "";
-                try
-                {
-                    $fakerProperty2 = $faker->getFormatter($property);
-                    $fakerProperty = $property;
-                }
-                catch (\InvalidArgumentException $e) { }
-
-                if(empty($fakerProperty))
-                {
-                    try
-                    {
-                        $fakerProperty2 = $faker->getFormatter($type);
-                        $fakerProperty = $type;
-                    }
-                    catch (\InvalidArgumentException $e) { }
-                }
-
-                if(empty($fakerProperty))
-                {
-                    $fakerType = "";
-                    switch($type)
-                    {
-                        case "integer":
-                        case "biginteger":
-                        case "smallinteger":
-                        case "tinyinteger":
-                            $fakerType = "randomDigitNotNull";
-                            break;
-                        case "string":
-                            $fakerType = "word";
-                            break;
-                        case "float":
-                        case "double":
-                            $fakerType = "randomFloat";
-                            break;
-                        case "mediumtext":
-                        case "longtext":
-                        case "binary":
-                            $fakerType = "text";
-                            break;
-                    }
-
-                    $fakerType = $fakerType ? "\$faker->".$fakerType : "0";
-                }
-                else
-                    $fakerType = "\$faker->".$fakerProperty;
-
-                $functionContent .= "\t\t\t\t'$property' => $fakerType,\n";
-
-            }
-        }
-
-        foreach($this->migration->getForeignKeys() as $key)
-            $functionContent .= "\t\t\t\t'$key' => \$i,\n";
-
-        $functionContent .= "\t\t\t);\n";
-
-        $namespace = $this->namespace ? "\\" . $this->namespace . "\\" : "";
-
-        $functionContent .= "\t\t\t". $namespace . $this->model->upper()."::create(\$".$this->model->lower().");\n";
-        $functionContent .= "\t\t}\n";
-
-        $fileContents = $this->fileCreator->createFunction("run", $functionContent);
-
-        $fileName = $this->configSettings['pathTo']['seeds'] . $this->model->upperPlural() . "TableSeeder.php";
-
-        $this->fileCreator->createClass($fileName, $fileContents, array('name' => 'DatabaseSeeder'), array(), array(), "class", false, false);
-
-        $tableSeederClassName = $this->model->upperPlural() . 'TableSeeder';
-
-        $content = \File::get($databaseSeeder);
-
-        if(preg_match("/$tableSeederClassName/", $content) !== 1)
-        {
-            $content = preg_replace("/(run\(\).+?)}/us", "$1\t\$this->call('{$tableSeederClassName}');\n\t}", $content);
-            \File::put($databaseSeeder, $content);
-        }
-    }
-
-    /**
      *  Create the repository
      *
      * @return array
@@ -784,36 +472,7 @@ class Scaffold
 
         $fileName = $this->configSettings['pathTo']['repositories'] . $this->nameOf("repository") . '.php';
 
-        $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates']."eloquent-repository.stub");
-    }
-
-    /**
-     *  Add repository folder so that it autoloads
-     *
-     * @return mixed
-     */
-    private function putRepositoryFolderInStartFiles()
-    {
-        $repositories = substr($this->configSettings['pathTo']['repositories'], 0, strlen($this->configSettings['pathTo']['repositories'])-1);
-
-        $startRepo = $repositories;
-
-        if(strpos($repositories, "app") !== false)
-            $startRepo = "app_path().'".substr($repositories, strpos($repositories, "/"), strlen($repositories) - strpos($repositories, "/"))."'";
-
-        $content = \File::get('app/start/global.php');
-
-        if (preg_match("/repositories/", $content) !== 1)
-            $content = preg_replace("/app_path\(\).'\/controllers',/", "app_path().'/controllers',\n\t$startRepo,", $content);
-
-        \File::put('app/start/global.php', $content);
-
-        $content = \File::get('composer.json');
-
-        if (preg_match("/repositories/", $content) !== 1)
-            $content = preg_replace("/\"app\/controllers\",/", "\"app/controllers\",\n\t\t\t\"$repositories\",", $content);
-
-        \File::put('composer.json', $content);
+        $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates']."/repository.stub");
     }
 
     /**
@@ -823,7 +482,7 @@ class Scaffold
      */
     private function createDataTable()
     {
-        $fileName = $this->configSettings['pathTo']['datatables'] . $this->nameOf("model"). ".php";
+        $fileName = $this->configSettings['pathTo']['datatables'] . $this->nameOf("datatables"). ".php";
 
         $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates']."/datatables.stub");
     }
@@ -837,21 +496,24 @@ class Scaffold
     {
         $fileName = $this->configSettings['pathTo']['controllers'] . $this->nameOf("controller"). ".php";
 
-        $this->makeFileFromTemplate($fileName, $this->templatePathWithControllerType."controller.stub");
+        $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates']."/controller.stub");
     }
 
     /**
-     *  Create tests
+     *  Create requests
      *
      * @return array
      */
-    private function createTests()
+    private function createRequests()
     {
-        $this->fileCreator->createDirectory($this->configSettings['pathTo']['tests']. 'controller');
+        $dir = $this->configSettings['pathTo']['requests'] ."/" . $this->model->upperPlural() . "/";
+        $this->fileCreator->createDirectory($dir);
 
-        $fileName = $this->configSettings['pathTo']['tests']."controller/" . $this->nameOf("test") .".php";
+        $createFileName = $dir . "CreateRequest.php";
+        $this->makeFileFromTemplate($createFileName, $this->configSettings['pathTo']['templates']."/request.stub");
 
-        $this->makeFileFromTemplate($fileName, $this->templatePathWithControllerType."test.stub");
+        $updateFileName = $dir . "UpdateRequest.php";
+        $this->makeFileFromTemplate($updateFileName, $this->configSettings['pathTo']['templates']."/request.stub");
     }
 
     /**
@@ -861,15 +523,11 @@ class Scaffold
      */
     private function updateRoutes()
     {
-        $routeFile = $this->configSettings['pathTo']['routes']."routes.php";
+        $routeFile = $this->configSettings['pathTo']['routes']."web.php";
 
         $namespace = $this->namespace ? $this->namespace . "\\" : "";
 
-        $fileContents = "";
-
-        $routeType = "resource";
-
-        $fileContents .= "Route::" . $routeType . "('" . $this->nameOf("viewFolder") . "', '" . $namespace. $this->nameOf("controller") ."');\n";
+        $fileContents = "Route::resource('" . $this->nameOf("viewFolder") . "', '" . $namespace. $this->nameOf("controller") ."');\n";
 
         $content = \File::get($routeFile);
         if (preg_match("/" . $this->model->lower() . "/", $content) !== 1)
@@ -885,7 +543,11 @@ class Scaffold
         if (!\File::isDirectory($dir))
             \File::makeDirectory($dir);
 
-        $pathToViews = $this->configSettings['pathTo']['templates'].$this->controllerType."/";
+        $pathToViews = $this->configSettings['pathTo']['templates']."/views/";
+
+        if (empty($this->model->getProperties())) {
+            return;
+        }
 
         foreach($this->configSettings['views'] as $view)
         {
@@ -895,9 +557,10 @@ class Scaffold
             {
                 $this->makeFileFromTemplate($fileName, $pathToViews."$view.stub");
             }
-            catch(FileNotFoundException $e)
+            catch(Exception $e)
             {
-                $this->command->error("Template file ".$pathToViews . $view.".stub does not exist! You need to create it to generate that file!");
+                if ($e instanceof FileNotFoundException)
+                    $this->command->error("Template file ".$pathToViews . $view.".stub does not exist! You need to create it to generate that file!");
             }
         }
     }
