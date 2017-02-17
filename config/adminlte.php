@@ -111,7 +111,7 @@ return [
         [
             'text' => 'Dashboard',
             'icon' => 'dashboard',
-            'url'  => 'dashboard',
+            'url'  => '/',
         ],
         [
             'text'    => 'Controle de Acesso',

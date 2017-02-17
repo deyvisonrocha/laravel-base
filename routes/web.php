@@ -15,16 +15,9 @@ Route::group(['middleware' => 'web'], function () {
     Route::auth();
 
     Route::group(['middleware' => 'auth'], function () {
-        Route::get('/', 'HomeController@index')->name('dashboard');
-        Route::get('/dashboard', 'HomeController@index');
+        Route::get('/', 'HomeController@index')->name('home');
 
         Route::resource('roles', 'RolesController');
         Route::resource('users', 'UsersController');
-
-        // Route::group(['middleware' => 'authorize'], function () {
-        //     /* ACLs */
-        //     Route::resource('enterprises', 'EnterprisesController');
-        //     Route::resource('users', 'UsersController');
-        // });
     });
 });
