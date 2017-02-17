@@ -414,6 +414,8 @@ class Scaffold
                     $this->putRepositoryFolderInStartFiles();
                 }
 
+                $this->createDataTable();
+
                 $this->createController();
 
                 $this->createViews();
@@ -440,14 +442,14 @@ class Scaffold
             $this->model->exists = true;
             return;
         }
+        if($this->model->hasSoftdeletes()) {
+            $fileContents = "\n\tuse Illuminate\Database\Eloquent\SoftDeletes;\n";
+        }
 
-        $fileContents = "protected \$table = '". $this->model->getTableName() ."';\n";
+        // $fileContents = "protected \$table = '". $this->model->getTableName() ."';\n";
 
         if(!$this->model->hasTimestamps())
             $fileContents .= "\tpublic \$timestamps = false;\n";
-
-        if($this->model->hasSoftdeletes())
-            $fileContents .= "\tprotected \$softDelete = true;\n";
 
         $properties = "";
         foreach ($this->model->getProperties() as $property => $type) {
@@ -460,11 +462,9 @@ class Scaffold
 
         $fileContents = $this->addRelationships($fileContents);
 
-        $template = $this->configSettings['useRepository'] ? "model.txt" : "model-no-repo.txt";
+        $template = "model.stub";
 
         $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates'].$template, $fileContents);
-
-        $this->addModelLinksToLayoutFile();
     }
 
     /**
@@ -481,22 +481,6 @@ class Scaffold
         $fileContents = trim($this->removeRelationships($fileContents)) . "\n}\n";
 
         \File::put($fileName, $fileContents);
-    }
-
-    /**
-     *  Adds model links to the layout file
-     */
-    private function addModelLinksToLayoutFile()
-    {
-        $layoutFile = $this->configSettings['pathTo']['layout'];
-        if(\File::exists($layoutFile))
-        {
-            $layout = \File::get($layoutFile);
-
-            $layout = str_replace("<!--[linkToModels]-->", "<a href=\"{{ url('".$this->nameOf("viewFolder")."') }}\" class=\"list-group-item\">".$this->model->upper()."</a>\n<!--[linkToModels]-->", $layout);
-
-            \File::put($layoutFile, $layout);
-        }
     }
 
     /**
@@ -812,11 +796,11 @@ class Scaffold
         if($useBaseRepository)
         {
             if(!file_exists($baseRepository))
-                $this->makeFileFromTemplate($baseRepository, $this->configSettings['pathTo']['templates']."base-repository-interface.txt");
+                $this->makeFileFromTemplate($baseRepository, $this->configSettings['pathTo']['templates']."base-repository-interface.stub");
             $repoTemplate .= "-with-base";
         }
 
-        $repoTemplate .= ".txt";
+        $repoTemplate .= ".stub";
 
         $fileName = $this->configSettings['pathTo']['repositoryInterfaces'] . $this->nameOf("repositoryInterface") . ".php";
 
@@ -834,7 +818,7 @@ class Scaffold
 
         $fileName = $this->configSettings['pathTo']['repositories'] . $this->nameOf("repository") . '.php';
 
-        $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates']."eloquent-repository.txt");
+        $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates']."eloquent-repository.stub");
     }
 
     /**
@@ -875,7 +859,7 @@ class Scaffold
     {
         $fileName = $this->configSettings['pathTo']['controllers'] . $this->nameOf("controller"). ".php";
 
-        $this->makeFileFromTemplate($fileName, $this->templatePathWithControllerType."controller.txt");
+        $this->makeFileFromTemplate($fileName, $this->templatePathWithControllerType."controller.stub");
     }
 
     /**
@@ -889,7 +873,7 @@ class Scaffold
 
         $fileName = $this->configSettings['pathTo']['tests']."controller/" . $this->nameOf("test") .".php";
 
-        $this->makeFileFromTemplate($fileName, $this->templatePathWithControllerType."test.txt");
+        $this->makeFileFromTemplate($fileName, $this->templatePathWithControllerType."test.stub");
     }
 
     /**
@@ -934,11 +918,11 @@ class Scaffold
 
             try
             {
-                $this->makeFileFromTemplate($fileName, $pathToViews."$view.txt");
+                $this->makeFileFromTemplate($fileName, $pathToViews."$view.stub");
             }
             catch(FileNotFoundException $e)
             {
-                $this->command->error("Template file ".$pathToViews . $view.".txt does not exist! You need to create it to generate that file!");
+                $this->command->error("Template file ".$pathToViews . $view.".stub does not exist! You need to create it to generate that file!");
             }
         }
     }
