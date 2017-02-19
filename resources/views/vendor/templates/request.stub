@@ -1,4 +1,4 @@
-<?php[namespace]
+<?php [namespace]
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;

@@ -1,4 +1,4 @@
-<?php[namespace]
+<?php [namespace]
 
 use App\Models\[Model];
 use Yajra\Datatables\Services\DataTable;

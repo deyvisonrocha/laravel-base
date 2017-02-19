@@ -258,7 +258,7 @@ class Scaffold
         $fileContents = "";
 
         if($this->model->hasSoftdeletes()) {
-            $fileContents = "\tuse Illuminate\Database\Eloquent\SoftDeletes;\n";
+            $fileContents = "use Illuminate\Database\Eloquent\SoftDeletes;\n";
         }
 
         if(!$this->model->hasTimestamps())
@@ -271,7 +271,7 @@ class Scaffold
 
         $properties = rtrim($properties, ",");
 
-        $fileContents .= "\tprotected \$fillable = [\n\t\t".$properties."\n\t];\n";
+        $fileContents .= "\tprotected \$fillable = [\n\t\t".$properties."\n\t\t];\n";
 
         $fileContents = $this->addRelationships($fileContents);
 
