@@ -21,6 +21,14 @@ return [
         'routes' => 'routes'
     ],
 
+    'namespaces' => [
+        'datatables' => 'App\DataTables',
+        'controllers' => 'App\Http\Controllers',
+        'requests' => 'App\Http\Requests',
+        'models' => 'App\Models',
+        'repositories' => 'App\Repositories'
+    ],
+
     /**
      * Dynamic Names
      *

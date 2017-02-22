@@ -59,11 +59,6 @@ class Scaffold
     private $onlyMigration = false;
 
     /**
-     * @var bool
-     */
-    private $namespaceGlobal;
-
-    /**
      * @var string
      */
     private $namespace;
@@ -109,6 +104,13 @@ class Scaffold
             }
         }
 
+        $configSettings['namespaces'] = config("scaffold.namespaces");
+
+        foreach($configSettings['namespaces'] as $path => $namespace)
+        {
+            $configSettings['namespaces'][$path] = $namespace;
+        }
+
         $configSettings['names'] = config("scaffold.names");
 
         $configSettings['views'] = config("scaffold.views");
@@ -132,6 +134,8 @@ class Scaffold
 
         while( $moreTables )
         {
+            $this->namespace = $this->configSettings['namespaces']['models'];
+
             $this->saveModelAndProperties($modelAndProperties, array());
 
             $this->createFiles();
@@ -181,21 +185,12 @@ class Scaffold
     private function saveModelAndProperties($modelAndProperties, $oldModelFile, $storeInArray = true)
     {
         do {
-            if(!$this->namespaceGlobal)
-                $this->namespace = "";
-
-            $this->model = new Model($this->command, $oldModelFile, $this->namespace);
+            $this->model = new Model($this->command, $oldModelFile, $this->configSettings['namespaces']['models']);
 
             $this->model->generateModel($modelAndProperties);
 
             if($storeInArray)
                 $this->models[$this->model->getTableName()] = $this->model;
-
-            if(!$this->namespaceGlobal)
-            {
-                $this->fileCreator->namespace = $this->model->getNamespace();
-                $this->namespace = $this->model->getNamespace();
-            }
 
             $modelNameCollision = in_array($this->model->lower(), $this->laravelClasses);
 
@@ -223,7 +218,7 @@ class Scaffold
 
         $tableCreated = $this->migration->createMigrations($this->lastTimeStamp);
 
-        $this->runMigrations();
+        // $this->runMigrations();
 
         if($tableCreated)
         {
@@ -266,12 +261,12 @@ class Scaffold
 
         $properties = "";
         foreach ($this->model->getProperties() as $property => $type) {
-            $properties .= "'$property',\n\t";
+            $properties .= "'$property',\n\t\t";
         }
 
         $properties = rtrim($properties, ",");
 
-        $fileContents .= "\tprotected \$fillable = [\n\t\t".$properties."\n\t\t];\n";
+        $fileContents .= "protected \$fillable = [\n\t\t".$properties."\n\t];\n";
 
         $fileContents = $this->addRelationships($fileContents);
 
@@ -484,6 +479,8 @@ class Scaffold
     {
         $fileName = $this->configSettings['pathTo']['datatables'] . $this->nameOf("datatables"). ".php";
 
+        $this->namespace = $this->configSettings['namespaces']['datatables'];
+
         $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates']."/datatables.stub");
     }
 
@@ -495,6 +492,8 @@ class Scaffold
     private function createController()
     {
         $fileName = $this->configSettings['pathTo']['controllers'] . $this->nameOf("controller"). ".php";
+
+        $this->namespace = $this->configSettings['namespaces']['controllers'];
 
         $this->makeFileFromTemplate($fileName, $this->configSettings['pathTo']['templates']."/controller.stub");
     }
@@ -508,6 +507,8 @@ class Scaffold
     {
         $dir = $this->configSettings['pathTo']['requests'] ."/" . $this->model->upperPlural() . "/";
         $this->fileCreator->createDirectory($dir);
+
+        $this->namespace = $this->configSettings['namespaces']['datatables'] . "\\". $this->model->upperPlural();
 
         $createFileName = $dir . "CreateRequest.php";
         $this->makeFileFromTemplate($createFileName, $this->configSettings['pathTo']['templates']."/request.stub");
@@ -579,14 +580,21 @@ class Scaffold
         $fileContents = $this->replaceNames($fileContents);
         $fileContents = $this->replaceModels($fileContents);
         $fileContents = $this->replaceProperties($fileContents);
+        $fileContents = $this->replaceNamespace($fileContents);
 
         if($content)
             $fileContents = str_replace("[content]", $content, $fileContents);
 
-        $namespace = $this->namespace ? "namespace ".$this->namespace. ";" : "";
-        $fileContents = str_replace("[namespace]", $namespace, $fileContents);
 
         $this->fileCreator->createFile($fileName, $fileContents);
+    }
+
+    public function replaceNamespace($fileContents)
+    {
+        $namespace = "\n\nnamespace ". $this->namespace . ';';
+        $fileContents = str_replace(" [namespace]", $namespace, $fileContents);
+
+        return $fileContents;
     }
 
     /**
