@@ -16,7 +16,6 @@ class Kernel extends ConsoleKernel
         \Spatie\MigrateFresh\Commands\MigrateFresh::class,
         \App\Console\Commands\ScaffoldCommand::class,
         \App\Console\Commands\ScaffoldModelCommand::class,
-        \App\Console\Commands\ScaffoldDestroy::class,
     ];
 
     /**
