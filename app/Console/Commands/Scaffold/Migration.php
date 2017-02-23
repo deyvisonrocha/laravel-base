@@ -573,16 +573,10 @@ class Migration
         $content = "";
         if ($this->model->hasTimestamps())
         {
-            if (!$this->tableHasColumn("created_at"))
+            if (!$this->tableHasColumn("created_at") && !$this->tableHasColumn("updated_at"))
             {
                 $this->columnsChanged = true;
-                $content .= "\t\t\t" . $this->setColumn("timestamp", "created_at") . ";\n";
-            }
-
-            if (!$this->tableHasColumn("updated_at"))
-            {
-                $this->columnsChanged = true;
-                $content .= "\t\t\t" . $this->setColumn("timestamp", "updated_at") . ";\n";
+                $content = "\t\t\t" . $this->setColumn('timestamps', null) . ";\n";
             }
         }
         return $content;
