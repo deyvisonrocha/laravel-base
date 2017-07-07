@@ -17,12 +17,20 @@ class SeedUsersTable extends Migration
     public function up()
     {
         $admin = User::create(['name' => 'Administrador', 'email' => 'admin@admin.com', 'password' => 'admin', 'role_id' => 1]);
-
-        $role = Role::find(1);
-
-        $admin->assignRole($role);
+        $roleAdmin = Role::find(1);
+        $admin->assignRole($roleAdmin);
         $admin->givePermissionTo(Permission::pluck('name'));
-        $role->givePermissionTo(Permission::pluck('name'));
+        $roleAdmin->givePermissionTo(Permission::pluck('name'));
+
+        $user = User::create(['name' => 'Usuário', 'email' => 'user@user.com', 'password' => 'user', 'role_id' => 2]);
+        $roleUser = Role::find(2);
+        $user->assignRole($roleUser);
+        $permissions = [
+            Permission::where('name', 'roles.edit')->pluck('name'),
+            Permission::where('name', 'roles.index')->pluck('name')
+        ];
+        $user->givePermissionTo($permissions);
+        $roleUser->givePermissionTo($permissions);
     }
 
     /**
