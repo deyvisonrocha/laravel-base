@@ -116,7 +116,6 @@ return [
         [
             'text'    => 'Controle de Acesso',
             'icon'    => 'unlock',
-            'cangroup'=> ['roles.index', 'users.index'],
             'submenu' => [
                 [
                     'text' => 'Perfil',
@@ -152,7 +151,6 @@ return [
         JeroenNoten\LaravelAdminLte\Menu\Filters\SubmenuFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\ClassesFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\GateFilter::class,
-        App\Menu\Filters\SubmenuFilter::class,
     ],
 
     /*
