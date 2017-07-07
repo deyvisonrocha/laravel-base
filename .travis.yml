@@ -1,11 +1,9 @@
 language: php
 
 php:
-  - 7.0
   - 7.1
 
 before_script:
-  - mkdir bootstrap/cache
   - chmod 777 -R storage
   - cp .env.travis .env
   - mysql -e 'create database homestead_test;'
