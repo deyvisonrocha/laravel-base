@@ -771,16 +771,16 @@
         },
         {
             "name": "jeroennoten/laravel-adminlte",
-            "version": "v1.19.0",
+            "version": "v1.19.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jeroennoten/Laravel-AdminLTE.git",
-                "reference": "e742a2ed8ad18d7f278d0e9d270e0ef1c1a6472c"
+                "reference": "14c89386a2861086ce6006745a7389a90a6916e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jeroennoten/Laravel-AdminLTE/zipball/e742a2ed8ad18d7f278d0e9d270e0ef1c1a6472c",
-                "reference": "e742a2ed8ad18d7f278d0e9d270e0ef1c1a6472c",
+                "url": "https://api.github.com/repos/jeroennoten/Laravel-AdminLTE/zipball/14c89386a2861086ce6006745a7389a90a6916e8",
+                "reference": "14c89386a2861086ce6006745a7389a90a6916e8",
                 "shasum": ""
             },
             "require": {
@@ -813,7 +813,7 @@
                 "administrator",
                 "laravel"
             ],
-            "time": "2017-02-02T06:02:19+00:00"
+            "time": "2017-03-30T11:46:56+00:00"
         },
         {
             "name": "laracasts/flash",
